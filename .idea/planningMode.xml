@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PlanningModeManager">
+    <option name="approvalStates">
+      <map>
+        <entry key="09aad11d-6251-4fad-b151-4fd616b7b867" value="false" />
+        <entry key="20260510-115427-d04dde6d-f067-4e3e-884a-62c0d953acb7" value="true" />
+        <entry key="20260512-094412-b746564c-4d2b-4278-acea-746fb3e4bb52" value="true" />
+        <entry key="20260512-102847-479cbd75-08eb-40ae-8bd6-66cb374db316" value="true" />
+        <entry key="20260513-074525-14302b10-2a20-4f23-b269-aa1656e52242" value="true" />
+        <entry key="20260523-155454-436d3c3b-09ae-4c68-8334-133885e09e4f" value="true" />
+        <entry key="20260523-210722-5620c3c2-3f42-41d0-ae05-3be9418c2e0c" value="true" />
+        <entry key="20260524-221349-46d2d303-38cc-4445-8a45-f836472ccde9" value="true" />
+        <entry key="20260526-204433-24b37ab1-4138-457f-9c95-2edb24285ec8" value="true" />
+        <entry key="20260527-190607-3ad84cce-9148-4f91-ae2e-7298c30c6bb7" value="true" />
+        <entry key="20260527-191542-8bcaed29-f6a0-4269-9ef1-84728624919d" value="true" />
+        <entry key="20260529-134207-a98b828b-5767-48e1-ba5c-0fb68a17a9f2" value="true" />
+        <entry key="20260530-015110-e3af355d-af85-4fd9-a72d-c7f4a15f1d4e" value="true" />
+        <entry key="20260608-100319-24583f52-debc-4e19-b194-30fc99e19a37" value="true" />
+        <entry key="20260608-141001-62b290f7-a4e5-4a4c-8ebe-e11a39ccafe1" value="true" />
+        <entry key="20260611-214048-07bc4be0-b90d-4153-8c0f-e1a269f6be7e" value="true" />
+        <entry key="20260611-214455-7901d20e-e8af-4fb3-8d16-018905586ac9" value="true" />
+        <entry key="20260611-231638-102d169c-46a3-4ae2-ae88-52ff9c960699" value="true" />
+        <entry key="20260613-134647-87239809-42d2-4537-bb95-8b52714673ce" value="true" />
+        <entry key="316efe6b-7efc-4e17-b336-23b82c11c7dc" value="false" />
+        <entry key="4b8cb386-f02a-49b1-9e16-fd5a6caef703" value="false" />
+        <entry key="b7b6ed92-924c-43af-b2c2-7c36054f9339" value="false" />
+        <entry key="e1abfd19-2f3f-4437-93b5-20b4b53e5522" value="false" />
+        <entry key="e5280100-084f-4517-8c51-67c39740d9a9" value="false" />
+        <entry key="f8408305-92b1-4f42-b5d3-a9436d83e802" value="false" />
+      </map>
+    </option>
+  </component>
+</project>

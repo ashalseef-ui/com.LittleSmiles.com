@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "875579778818",
+    "project_id": "little-buds-academy",
+    "storage_bucket": "little-buds-academy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875579778818:android:41042942bb8345db16c41b",
+        "android_client_info": {
+          "package_name": "com.Shabbir.BabyBrush"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "875579778818-b8rk194ml9hnotvj1sg3hfpvcvanvall.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Shabbir.BabyBrush",
+            "certificate_hash": "580aff638ec005b7c31941daa5f0a65372975af5"
+          }
+        },
+        {
+          "client_id": "875579778818-s3d5d4sld753sn6c05uhrr3tp4te4fpm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBND3G-J37NYNeXPlNyfhYNzwmsEWhK9KI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "875579778818-s3d5d4sld753sn6c05uhrr3tp4te4fpm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

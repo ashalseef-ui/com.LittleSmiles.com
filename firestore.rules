@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // LittleSmiles Secure Rules
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Only allow creation of own profile.
+      allow create: if request.auth != null && request.auth.uid == userId
+                    && request.resource.data.isPremium == false
+                    && request.resource.data.trialStartDate == null;
+
+      // Prevent client-side modification of entitlement fields,
+      // EXCEPT starting the trial (setting trialStartDate if null).
+      allow update: if request.auth != null && request.auth.uid == userId
+                    && (
+                      // Case 1: Entitlement fields NOT changed
+                      (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['isPremium', 'trialStartDate']))
+                      ||
+                      // Case 2: Starting the trial for the first time
+                      (resource.data.trialStartDate == null && request.resource.data.trialStartDate == request.time)
+                    );
+
+      match /login_history/{id} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="17">
+      <module name="com.LittleSmiles.com.feature.stickers" target="21" />
+      <module name="LittleSmiles.app" target="21" />
+      <module name="LittleSmiles.core.common" target="21" />
+      <module name="LittleSmiles.core.navigation" target="21" />
+      <module name="LittleSmiles.core.ui" target="21" />
+      <module name="LittleSmiles.data" target="21" />
+      <module name="LittleSmiles.feature.auth" target="21" />
+      <module name="LittleSmiles.feature.games" target="21" />
+      <module name="LittleSmiles.feature.learning" target="21" />
+      <module name="LittleSmiles.feature.loading" target="21" />
+      <module name="LittleSmiles.feature.menu" target="21" />
+      <module name="LittleSmiles.feature.parent-hub" target="21" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
