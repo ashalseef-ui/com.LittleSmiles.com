@@ -131,28 +131,41 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
-            JoyfulBranding()
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                JoyfulBranding()
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    color = RainbowOrange.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, RainbowOrange.copy(alpha = 0.5f))
+                ) {
+                    Text(
+                        "✨ EARLY ACCESS 2026: ALL GAMES FREE ✨",
+                        color = RainbowOrange,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 11.sp,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
 
             CloudLoginCard(isLoading) {
                 Column(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Value Proposition moved to header, Card is pure auth now
                     Text(
-                        "✨ EARLY ACCESS 2026 ✨",
-                        color = RainbowOrange,
+                        "Parent Login",
+                        color = SkyBlueDark,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Black,
-                        fontSize = 15.sp,
-                        modifier = Modifier.padding(bottom = 6.dp)
-                    )
-                    Text(
-                        "Unlock all games for free!",
-                        color = SlateText,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 20.dp)
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
 
                     JoyfulTextField(
@@ -181,18 +194,30 @@ fun LoginScreen(
                     )
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = rememberMe,
-                                onCheckedChange = { rememberMe = it },
-                                colors = CheckboxDefaults.colors(checkedColor = RainbowBlue),
-                                modifier = Modifier.scale(0.85f)
-                            )
-                            Text("Remember Email", fontSize = 12.sp, color = SlateText, fontWeight = FontWeight.Bold)
+                        Surface(
+                            onClick = { rememberMe = !rememberMe },
+                            color = Color.Transparent,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp)
+                            ) {
+                                Checkbox(
+                                    checked = rememberMe,
+                                    onCheckedChange = null, // Handled by Surface click
+                                    colors = CheckboxDefaults.colors(checkedColor = RainbowBlue),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Remember Email", fontSize = 13.sp, color = SlateText, fontWeight = FontWeight.Bold)
+                            }
                         }
                         TextButton(
                             onClick = { 
@@ -204,7 +229,7 @@ fun LoginScreen(
                             }, 
                             enabled = !isLoading
                         ) {
-                            Text("Forgot Pwd?", color = SkyBlueDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text("Forgot Pwd?", color = SkyBlueDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -284,14 +309,6 @@ fun LoginScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                "Parental Supervision Required",
-                color = SlateText.copy(alpha = 0.6f),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
@@ -512,7 +529,17 @@ fun JoyfulTextField(
             value = value,
             onValueChange = onValueChange,
             label = { Text(label, fontWeight = FontWeight.Bold) },
-            leadingIcon = { Icon(icon, null, tint = SkyBluePrimary) },
+            leadingIcon = {
+                Surface(
+                    shape = CircleShape,
+                    color = SkyBlueLight.copy(alpha = 0.5f),
+                    modifier = Modifier.padding(6.dp).size(32.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(icon, null, tint = SkyBlueDark, modifier = Modifier.size(18.dp))
+                    }
+                }
+            },
             trailingIcon = if (isPassword && onTogglePassword != null) {
                 {
                     IconButton(onClick = onTogglePassword) {
@@ -521,10 +548,12 @@ fun JoyfulTextField(
                 }
             } else null,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(24.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = RainbowBlue,
                 unfocusedBorderColor = SkyBlueLight,
+                focusedContainerColor = Color(0xFFFEF9C3).copy(alpha = 0.4f),
+                unfocusedContainerColor = Color(0xFFF0F9FF).copy(alpha = 0.6f),
                 focusedLabelColor = RainbowBlue,
                 unfocusedLabelColor = SlateText,
                 cursorColor = RainbowBlue
@@ -536,7 +565,7 @@ fun JoyfulTextField(
             enabled = enabled
         )
         if (error != null) {
-            Text(error, color = ErrorRed, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp, top = 2.dp))
+            Text(error, color = ErrorRed, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 16.dp, top = 4.dp))
         }
     }
 }
@@ -549,14 +578,25 @@ fun JoyfulButton(
     enabled: Boolean = true,
     isLoading: Boolean = false
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val offsetY = if (isPressed) 4.dp else 0.dp
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .squishClickable(onClick = { if (enabled && !isLoading) onClick() }),
+            .offset(y = offsetY)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled && !isLoading,
+                onClick = onClick
+            ),
         color = if (enabled) backgroundColor else Color.LightGray,
-        shape = RoundedCornerShape(24.dp),
-        shadowElevation = if (enabled) 6.dp else 0.dp
+        shape = RoundedCornerShape(28.dp),
+        shadowElevation = if (enabled && !isPressed) 6.dp else 1.dp,
+        border = BorderStroke(3.dp, if (enabled) backgroundColor.copy(alpha = 0.8f) else Color.Gray)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
@@ -575,22 +615,40 @@ fun JoyfulGoogleButton(
     enabled: Boolean,
     contentDescription: String? = null
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val offsetY = if (isPressed) 3.dp else 0.dp
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .squishClickable(onClick = { if (enabled) onClick() }),
+            .offset(y = offsetY)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                onClick = onClick
+            ),
         color = Color.White,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(28.dp),
         border = BorderStroke(2.dp, SkyBlueLight),
-        shadowElevation = 2.dp
+        shadowElevation = if (isPressed) 1.dp else 4.dp
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.CloudQueue, contentDescription, tint = RainbowBlue, modifier = Modifier.size(22.dp))
+            Surface(
+                shape = CircleShape,
+                color = SkyBlueLight.copy(alpha = 0.2f),
+                modifier = Modifier.size(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.CloudQueue, contentDescription, tint = RainbowBlue, modifier = Modifier.size(20.dp))
+                }
+            }
             Spacer(Modifier.width(12.dp))
             Text("Fly with Google", color = Color(0xFF1F2937), fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
         }
