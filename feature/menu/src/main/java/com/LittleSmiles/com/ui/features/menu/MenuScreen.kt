@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.LittleSmiles.com.ui.theme.RainbowOrange
 import com.LittleSmiles.com.core.domain.model.AccessTier
 import com.LittleSmiles.com.core.domain.model.Entitlement
 import com.LittleSmiles.com.core.domain.model.LearningActivityType
@@ -88,9 +89,6 @@ fun MenuScreen(
     val entitlement by viewModel.entitlement.collectAsState()
     val tts = viewModel.tts
     val context = LocalContext.current
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val columns = if (isLandscape) 4 else 2
 
     var showParentalGate by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
@@ -211,19 +209,25 @@ fun MenuScreen(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ConversionBanner(
-                entitlement = entitlement,
-                onCta = {
-                    if (!entitlement.isSignedIn) {
-                        navController.navigate(Screen.Login.route)
-                    } else if (entitlement.tier != AccessTier.PREMIUM) {
-                        showUpgradeGate = true
-                    }
-                }
-            )
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFFECFDF5),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text(
+                    text = "✨ EARLY ACCESS 2026: ALL GAMES UNLOCKED ✨",
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                    color = Color(0xFF047857),
+                    fontWeight = FontWeight.Black,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(columns),
+                columns = GridCells.Adaptive(minSize = 160.dp),
                 contentPadding = PaddingValues(bottom = 32.dp, top = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -260,77 +264,6 @@ fun MenuScreen(
 }
 
 @Composable
-private fun ConversionBanner(
-    entitlement: Entitlement,
-    onCta: () -> Unit
-) {
-    when (entitlement.tier) {
-        AccessTier.PREMIUM -> return
-        AccessTier.TRIAL -> {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0xFFECFDF5),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            ) {
-                Text(
-                    text = "Trial: ${entitlement.trialDaysLeft} day${if (entitlement.trialDaysLeft == 1L) "" else "s"} left — all games open!",
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                    color = Color(0xFF047857),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-        AccessTier.FREE -> {
-            val title = if (!entitlement.isSignedIn) {
-                "Enjoy 3 free games · Premium coming soon with 20+ more!"
-            } else {
-                "Free games unlocked · Premium coming soon!"
-            }
-            val cta = "See What's Coming"
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0xFFFFF7ED),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Star,
-                        contentDescription = null,
-                        tint = Color(0xFFEA580C),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = title,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 8.dp),
-                        color = Color(0xFF9A3412),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 12.sp
-                    )
-                    Button(
-                        onClick = onCta,
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEA580C))
-                    ) {
-                        Text(cta, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun BrandingTitle(entitlement: Entitlement) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val titleText = "Little Buds Academy"
@@ -354,16 +287,12 @@ fun BrandingTitle(entitlement: Entitlement) {
             }
         }
 
-        val subtitle = when (entitlement.tier) {
-            AccessTier.PREMIUM -> "PREMIUM"
-            AccessTier.TRIAL -> "FREE TRIAL: ${entitlement.trialDaysLeft} DAYS LEFT"
-            AccessTier.FREE -> if (entitlement.isSignedIn) "FREE PLAN" else "FREE PLAY"
-        }
+        val subtitle = "2026 EARLY ACCESS"
         Text(
             text = subtitle,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF64748B),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            color = RainbowOrange,
             modifier = Modifier.padding(top = 0.dp)
         )
     }
@@ -461,16 +390,6 @@ private fun MenuButtonSurface(
                             .size(56.dp)
                             .padding(bottom = 8.dp)
                     )
-                    if (locked) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Locked",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .size(22.dp)
-                        )
-                    }
                 }
                 Text(
                     text = data.title,
@@ -479,14 +398,6 @@ private fun MenuButtonSurface(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
-                if (locked) {
-                    Text(
-                        text = "Premium",
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
             }
         }
     }

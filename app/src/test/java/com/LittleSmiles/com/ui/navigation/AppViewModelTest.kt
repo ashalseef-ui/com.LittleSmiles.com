@@ -64,13 +64,13 @@ class AppViewModelTest {
     }
 
     @Test
-    fun `when no user is logged in, state should be FreePlay`() = runTest {
+    fun `when no user is logged in, state should be LoginRequired`() = runTest {
         every { authRepository.currentUserId } returns null
 
         viewModel = AppViewModel(userRepository, billingRepository, authRepository)
 
-        assertEquals(NavigationState.FreePlay, viewModel.uiState.value)
-        assertTrue(!viewModel.entitlement.value.hasFullAccess)
+        assertEquals(NavigationState.LoginRequired, viewModel.uiState.value)
+        assertTrue(!viewModel.entitlement.value.isSignedIn)
     }
 
     @Test
@@ -85,7 +85,7 @@ class AppViewModelTest {
     }
 
     @Test
-    fun `when user is logged in and within 7-day trial, state should be Authenticated with full access`() =
+    fun `when user is logged in and within an active trial, state should be Authenticated with full access`() =
         runTest {
             every { authRepository.currentUserId } returns "test_uid"
 
@@ -107,14 +107,14 @@ class AppViewModelTest {
         }
 
     @Test
-    fun `when trial expired, state stays Authenticated with free soft access`() = runTest {
+    fun `when trial would have expired, user still has full access during Early Access 2026`() = runTest {
         every { authRepository.currentUserId } returns "test_uid"
 
         val expiredUser = User(
             uid = "test_uid",
             email = "test@test.com",
             deviceId = "device123",
-            trialStartDate = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(10),
+            trialStartDate = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(31),
             isPremium = false,
             minutesUsedToday = 0
         )
@@ -124,17 +124,9 @@ class AppViewModelTest {
         viewModel = AppViewModel(userRepository, billingRepository, authRepository)
 
         assertEquals(NavigationState.Authenticated, viewModel.uiState.value)
-        assertTrue(!viewModel.entitlement.value.hasFullAccess)
-        assertTrue(
-            viewModel.entitlement.value.canAccess(
-                com.LittleSmiles.com.core.domain.model.LearningActivityType.Colors
-            )
-        )
-        assertTrue(
-            !viewModel.entitlement.value.canAccess(
-                com.LittleSmiles.com.core.domain.model.LearningActivityType.Animals
-            )
-        )
+        // Verified: All signed-in users have full access in 2026 phase
+        assertTrue(viewModel.entitlement.value.hasFullAccess)
+        assertEquals(com.LittleSmiles.com.core.domain.model.AccessTier.PREMIUM, viewModel.entitlement.value.tier)
     }
 
     @Test

@@ -25,7 +25,7 @@ class MenuViewModel @Inject constructor(
     private val _userProfile = MutableStateFlow<User?>(null)
     val userProfile: StateFlow<User?> = _userProfile.asStateFlow()
 
-    private val _entitlement = MutableStateFlow(Entitlement.GuestFree)
+    private val _entitlement = MutableStateFlow(Entitlement.Default)
     val entitlement: StateFlow<Entitlement> = _entitlement.asStateFlow()
 
     init {
@@ -37,7 +37,7 @@ class MenuViewModel @Inject constructor(
             val uid = authRepository.currentUserId
             if (uid == null) {
                 _userProfile.value = null
-                _entitlement.value = Entitlement.GuestFree
+                _entitlement.value = Entitlement.Default
                 return@launch
             }
             when (val result = userRepository.loadUserProfile(uid)) {
@@ -48,7 +48,7 @@ class MenuViewModel @Inject constructor(
                 is ProfileResult.Error -> {
                     // Keep last known entitlement; avoid kicking kids out mid-play.
                     if (_userProfile.value == null) {
-                        _entitlement.value = Entitlement.GuestFree.copy(isSignedIn = true)
+                        _entitlement.value = Entitlement.Default.copy(isSignedIn = true)
                     }
                 }
             }

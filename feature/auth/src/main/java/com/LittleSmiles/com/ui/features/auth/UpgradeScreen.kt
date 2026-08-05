@@ -65,13 +65,11 @@ import com.LittleSmiles.com.ui.theme.SuccessGreen
 fun UpgradeScreen(
     onPurchased: () -> Unit,
     onContinueFree: () -> Unit,
-    onLoginForTrial: (() -> Unit)? = null,
     viewModel: UpgradeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val products by viewModel.products.collectAsState()
     val purchaseState by viewModel.purchaseState.collectAsState()
-    val isGuest by viewModel.isGuest.collectAsState()
 
     var showParentalGate by remember { mutableStateOf(false) }
     var pendingProduct by remember { mutableStateOf<PremiumProductId?>(null) }
@@ -161,28 +159,6 @@ fun UpgradeScreen(
         BenefitRow("All learning games & Magic Markers")
         BenefitRow("Ad-free, kid-safe experience")
         BenefitRow("Progress synced for your family")
-
-        /*
-        if (isGuest && onLoginForTrial != null) {
-            Spacer(modifier = Modifier.height(20.dp))
-            Button(
-                onClick = onLoginForTrial,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = RainbowGreen)
-            ) {
-                Text("Start 14-Day Free Trial", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
-            Text(
-                text = "Full access for 14 days after you create an account",
-                fontSize = 12.sp,
-                color = SlateText,
-                modifier = Modifier.padding(top = 6.dp)
-            )
-        }
-        */
 
         Spacer(modifier = Modifier.height(32.dp))
         
@@ -356,12 +332,10 @@ private fun ProductCard(
     }
 }
 
-/** Soft replacement for the old hard lockout screen. */
 @Composable
 fun TrialExpiredScreen(onUpgrade: () -> Unit, onLogout: () -> Unit) {
     UpgradeScreen(
         onPurchased = onUpgrade,
-        onContinueFree = onUpgrade,
-        onLoginForTrial = null
+        onContinueFree = onUpgrade
     )
 }

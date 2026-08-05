@@ -23,9 +23,7 @@ import javax.inject.Inject
 /**
  * Session + entitlement orchestrator.
  *
- * Soft freemium: expired trial users still reach Menu (free games).
- * Guests reach Menu with free games only (traffic / habit).
- * Locked games convert via Upgrade / Start Trial CTAs.
+ * Mandatory login phase: all content unlocked for verified users during 2026 Early Access.
  */
 @HiltViewModel
 class AppViewModel @Inject constructor(
@@ -40,11 +38,11 @@ class AppViewModel @Inject constructor(
     private val _userProfile = MutableStateFlow<User?>(null)
     val userProfile: StateFlow<User?> = _userProfile.asStateFlow()
 
-    private val _entitlement = MutableStateFlow(Entitlement.GuestFree)
+    private val _entitlement = MutableStateFlow(Entitlement.Default)
     val entitlement: StateFlow<Entitlement> = _entitlement.asStateFlow()
 
     init {
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        registerProcessLifecycleObserver()
         viewModelScope.launch {
             runCatching { billingRepository.startConnection() }
                 .onFailure { Timber.e(it, "Initial billing connection failed") }
@@ -68,21 +66,15 @@ class AppViewModel @Inject constructor(
             val uid = authRepository.currentUserId
             if (uid == null) {
                 _userProfile.value = null
-                _entitlement.value = Entitlement.GuestFree
-                _uiState.value = NavigationState.FreePlay
+                _entitlement.value = Entitlement.Default
+                _uiState.value = NavigationState.LoginRequired
                 return@launch
             }
             validateUser(uid)
         }
     }
 
-    /** Guest / soft-free path from Login — keeps users in-app for organic growth. */
-    fun continueAsFree() {
-        authRepository.signOut()
-        _userProfile.value = null
-        _entitlement.value = Entitlement.GuestFree
-        _uiState.value = NavigationState.FreePlay
-    }
+    /** Mandatory Login Phase: Guest path is no longer supported. */
 
     private suspend fun validateUser(uid: String) {
         when (val result = userRepository.loadUserProfile(uid)) {
@@ -124,7 +116,7 @@ class AppViewModel @Inject constructor(
     fun logout() {
         authRepository.signOut()
         _userProfile.value = null
-        _entitlement.value = Entitlement.GuestFree
+        _entitlement.value = Entitlement.Default
         _uiState.value = NavigationState.LoginRequired
     }
 
@@ -138,7 +130,19 @@ class AppViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
+        removeProcessLifecycleObserver()
+    }
+
+    private fun registerProcessLifecycleObserver() {
+        runCatching {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        }.onFailure { Timber.d(it, "ProcessLifecycleOwner registration skipped") }
+    }
+
+    private fun removeProcessLifecycleObserver() {
+        runCatching {
+            ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
+        }.onFailure { Timber.d(it, "ProcessLifecycleOwner removal skipped") }
     }
 }
 
@@ -146,8 +150,6 @@ sealed class NavigationState {
     data object Loading : NavigationState()
     /** Signed-in user with profile (trial, free, or premium). */
     data object Authenticated : NavigationState()
-    /** Not signed in — free activities only. */
-    data object FreePlay : NavigationState()
     data object LoginRequired : NavigationState()
     data class Error(val message: String) : NavigationState()
 }

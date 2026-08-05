@@ -252,7 +252,7 @@ fun DrawingScreen(
             ) {
                 IconButton(
                     onClick = { paths.clear() },
-                    modifier = Modifier.size(44.dp).background(Color.White, CircleShape).border(1.dp, Color(0xFFE2E8F0), CircleShape)
+                    modifier = Modifier.size(52.dp).background(Color.White, CircleShape).border(1.dp, Color(0xFFE2E8F0), CircleShape)
                 ) {
                     Icon(Icons.Default.Delete, "Clear", tint = Color.Red)
                 }
@@ -277,7 +277,7 @@ fun DrawingScreen(
 
                 IconButton(
                     onClick = { saveCanvasToGallery(context, paths) },
-                    modifier = Modifier.size(44.dp).background(Color.White, CircleShape).border(1.dp, Color(0xFFE2E8F0), CircleShape)
+                    modifier = Modifier.size(52.dp).background(Color.White, CircleShape).border(1.dp, Color(0xFFE2E8F0), CircleShape)
                 ) {
                     Icon(Icons.Default.Image, "Save", tint = Color(0xFF0EA5E9))
                 }
@@ -291,7 +291,7 @@ fun TemplateButton(icon: androidx.compose.ui.graphics.vector.ImageVector, isSele
     IconButton(
         onClick = onClick,
         modifier = Modifier
-            .size(44.dp)
+            .size(52.dp)
             .background(if (isSelected) Color(0xFFCBD5E1) else Color.White, CircleShape)
             .border(if (isSelected) 2.dp else 1.dp, if (isSelected) Color(0xFF64748B) else Color(0xFFE2E8F0), CircleShape)
     ) {

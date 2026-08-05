@@ -23,7 +23,6 @@ import androidx.navigation.compose.composable
 import com.LittleSmiles.com.core.navigation.Screen
 import com.LittleSmiles.com.core.ui.R
 import com.LittleSmiles.com.ui.features.auth.LoginScreen
-import com.LittleSmiles.com.ui.features.auth.UpgradeScreen
 import com.LittleSmiles.com.ui.features.drawing.DrawingScreen
 import com.LittleSmiles.com.ui.features.learning.screens.AnimalScreen
 import com.LittleSmiles.com.ui.features.learning.screens.BodyPartScreen
@@ -47,9 +46,8 @@ fun AppNavigation(
     viewModel: AppViewModel = hiltViewModel()
 ) {
     val navState by viewModel.uiState.collectAsState()
-    val entitlement by viewModel.entitlement.collectAsState()
     val user by viewModel.userProfile.collectAsState()
-    val userId = user?.uid ?: "guest"
+    val userId = user?.uid ?: ""
     val context = LocalContext.current
     val webClientId = stringResource(R.string.firebase_web_client_id)
 
@@ -69,19 +67,11 @@ fun AppNavigation(
 
     LaunchedEffect(navState) {
         when (navState) {
-            is NavigationState.Authenticated, is NavigationState.FreePlay -> {
+            is NavigationState.Authenticated -> {
                 val currentRoute = navController.currentDestination?.route
-                if (currentRoute == Screen.Splash.route ||
-                    currentRoute == Screen.Login.route ||
-                    currentRoute == Screen.Upgrade.route ||
-                    currentRoute == Screen.TrialExpired.route
-                ) {
-                    // Don't auto-leave Upgrade after purchase until onPurchased handles it;
-                    // only bounce from splash/login into menu.
-                    if (currentRoute == Screen.Splash.route || currentRoute == Screen.Login.route) {
-                        navController.navigate(Screen.Menu.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
+                if (currentRoute == Screen.Splash.route || currentRoute == Screen.Login.route) {
+                    navController.navigate(Screen.Menu.route) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             }
@@ -115,42 +105,7 @@ fun AppNavigation(
             composable(Screen.Splash.route) { LoadingScreen() }
 
             composable(Screen.Login.route) {
-                LoginScreen(
-                    onLoginSuccess = { viewModel.checkSession() },
-                    onContinueFree = { viewModel.continueAsFree() }
-                )
-            }
-
-            composable(Screen.Upgrade.route) {
-                UpgradeScreen(
-                    onPurchased = {
-                        viewModel.refreshEntitlement()
-                        navController.navigate(Screen.Menu.route) {
-                            popUpTo(Screen.Menu.route) { inclusive = true }
-                        }
-                    },
-                    onContinueFree = { navController.popBackStack() },
-                    onLoginForTrial = {
-                        navController.navigate(Screen.Login.route)
-                    }
-                )
-            }
-
-            composable(Screen.TrialExpired.route) {
-                UpgradeScreen(
-                    onPurchased = {
-                        viewModel.refreshEntitlement()
-                        navController.navigate(Screen.Menu.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
-                    onContinueFree = {
-                        navController.navigate(Screen.Menu.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
-                    onLoginForTrial = { navController.navigate(Screen.Login.route) }
-                )
+                LoginScreen(onLoginSuccess = { viewModel.checkSession() })
             }
 
             composable(Screen.Menu.route) {
@@ -177,28 +132,13 @@ fun AppNavigation(
                 ShapeScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Animals.route) {
-                GuardedPremiumRoute(
-                    allowed = entitlement.canAccessRoute(Screen.Animals.route),
-                    onBlocked = { navController.navigate(Screen.Upgrade.route) }
-                ) {
-                    AnimalScreen(onBack = { navController.popBackStack() })
-                }
+                AnimalScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Routines.route) {
-                GuardedPremiumRoute(
-                    allowed = entitlement.canAccessRoute(Screen.Routines.route),
-                    onBlocked = { navController.navigate(Screen.Upgrade.route) }
-                ) {
-                    RoutineScreen(onBack = { navController.popBackStack() })
-                }
+                RoutineScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Opposites.route) {
-                GuardedPremiumRoute(
-                    allowed = entitlement.canAccessRoute(Screen.Opposites.route),
-                    onBlocked = { navController.navigate(Screen.Upgrade.route) }
-                ) {
-                    OppositeScreen(onBack = { navController.popBackStack() })
-                }
+                OppositeScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Letters.route) {
                 TracingScreen(mode = "ABC", onBack = { navController.popBackStack() })
@@ -210,36 +150,16 @@ fun AppNavigation(
                 TracingScreen(mode = "ABC", onBack = { navController.popBackStack() })
             }
             composable(Screen.BodyParts.route) {
-                GuardedPremiumRoute(
-                    allowed = entitlement.canAccessRoute(Screen.BodyParts.route),
-                    onBlocked = { navController.navigate(Screen.Upgrade.route) }
-                ) {
-                    BodyPartScreen(onBack = { navController.popBackStack() })
-                }
+                BodyPartScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Emotions.route) {
-                GuardedPremiumRoute(
-                    allowed = entitlement.canAccessRoute(Screen.Emotions.route),
-                    onBlocked = { navController.navigate(Screen.Upgrade.route) }
-                ) {
-                    EmotionScreen(onBack = { navController.popBackStack() })
-                }
+                EmotionScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Matching.route) {
-                GuardedPremiumRoute(
-                    allowed = entitlement.canAccessRoute(Screen.Matching.route),
-                    onBlocked = { navController.navigate(Screen.Upgrade.route) }
-                ) {
-                    MatchingScreen(onBack = { navController.popBackStack() })
-                }
+                MatchingScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.Drawing.route) {
-                GuardedPremiumRoute(
-                    allowed = entitlement.canAccessRoute(Screen.Drawing.route),
-                    onBlocked = { navController.navigate(Screen.Upgrade.route) }
-                ) {
-                    DrawingScreen(onBack = { navController.popBackStack() })
-                }
+                DrawingScreen(onBack = { navController.popBackStack() })
             }
 
             composable(Screen.ParentalHub.route) {
@@ -263,19 +183,5 @@ fun AppNavigation(
                 }
             )
         }
-    }
-}
-
-@Composable
-private fun GuardedPremiumRoute(
-    allowed: Boolean,
-    onBlocked: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    LaunchedEffect(allowed) {
-        if (!allowed) onBlocked()
-    }
-    if (allowed) {
-        content()
     }
 }

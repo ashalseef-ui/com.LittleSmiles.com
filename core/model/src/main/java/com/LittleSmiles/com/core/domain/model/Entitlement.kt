@@ -8,7 +8,7 @@ package com.LittleSmiles.com.core.domain.model
  * users and convert high-intent taps on locked games.
  */
 enum class AccessTier {
-    /** Forever-free activities only (guest or post-trial). */
+    /** Content unlocked for verified users. */
     FREE,
     /** Full catalog during the one-time 14-day trial. */
     TRIAL,
@@ -34,32 +34,21 @@ data class Entitlement(
     }
 
     companion object {
-        val GuestFree: Entitlement = Entitlement(
+        val Default: Entitlement = Entitlement(
             tier = AccessTier.FREE,
             trialDaysLeft = 0,
             isSignedIn = false
         )
 
         fun fromUser(user: User?): Entitlement {
-            if (user == null) return GuestFree
+            if (user == null) return Default
             
-            return when {
-                user.isPremium -> Entitlement(
-                    tier = AccessTier.PREMIUM,
-                    trialDaysLeft = 0,
-                    isSignedIn = true
-                )
-                user.isTrialActive -> Entitlement(
-                    tier = AccessTier.TRIAL,
-                    trialDaysLeft = user.trialDaysLeft,
-                    isSignedIn = true
-                )
-                else -> Entitlement(
-                    tier = AccessTier.FREE,
-                    trialDaysLeft = 0,
-                    isSignedIn = true
-                )
-            }
+            // 2026 EARLY ACCESS: All verified users get full access automatically.
+            return Entitlement(
+                tier = AccessTier.PREMIUM,
+                trialDaysLeft = 0,
+                isSignedIn = true
+            )
         }
     }
 }

@@ -32,12 +32,14 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             try {
-                val uid = authRepository.signIn(email, pass)
+                val normalizedEmail = email.trim()
+                val normalizedPass = pass.trim()
+                val uid = authRepository.signIn(normalizedEmail, normalizedPass)
                 if (!authRepository.isEmailVerified) {
-                    _uiState.value = AuthUiState.Unverified(email)
+                    _uiState.value = AuthUiState.Unverified(normalizedEmail)
                     return@launch
                 }
-                handleLogin(uid, email, deviceId)
+                handleLogin(uid, normalizedEmail, deviceId)
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(e.message ?: "Sign in failed")
             }
@@ -58,13 +60,13 @@ class AuthViewModel @Inject constructor(
 
                     // Start trial if verified but not started yet
                     if (authRepository.isEmailVerified && !profile.hasTrialStarted) {
-                        userRepository.startTrial(uid, deviceId)
+                        runCatching { userRepository.startTrial(uid, deviceId) }
                     } else if (profile.deviceId == null) {
                         // Bind device for existing verified users who haven't logged in since the lock was added
-                        userRepository.updateDeviceId(uid, deviceId)
+                        runCatching { userRepository.updateDeviceId(uid, deviceId) }
                     }
 
-                    userRepository.logLoginTimestamp(uid)
+                    runCatching { userRepository.logLoginTimestamp(uid) }
                     _uiState.value = AuthUiState.Success
                 } else {
                     // New profile (e.g. Google Sign-in or first sign-in)
@@ -72,11 +74,11 @@ class AuthViewModel @Inject constructor(
                     userRepository.createUserProfile(newUser)
                     
                     if (authRepository.isEmailVerified) {
-                        userRepository.startTrial(uid, deviceId)
+                        runCatching { userRepository.startTrial(uid, deviceId) }
                         analyticsHelper.logEvent(AnalyticsEvents.TRIAL_STARTED)
                     }
                     
-                    userRepository.logLoginTimestamp(uid)
+                    runCatching { userRepository.logLoginTimestamp(uid) }
                     _uiState.value = AuthUiState.Success
                 }
             }
@@ -90,17 +92,19 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             try {
-                val uid = authRepository.signUp(email, pass)
+                val normalizedEmail = email.trim()
+                val normalizedPass = pass.trim()
+                val uid = authRepository.signUp(normalizedEmail, normalizedPass)
                 // Wait for the Auth state to stabilize before sending email
                 kotlinx.coroutines.delay(1000) 
                 authRepository.sendEmailVerification()
                 startResendTimer()
                 
                 // Create profile with null trialStartDate and deviceId (pending verification)
-                val newUser = User(uid, email, null, null, false, 0)
+                val newUser = User(uid, normalizedEmail, null, null, false, 0)
                 userRepository.createUserProfile(newUser)
                 
-                _uiState.value = AuthUiState.Unverified(email)
+                _uiState.value = AuthUiState.Unverified(normalizedEmail)
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(e.message ?: "Sign up failed")
             }
@@ -149,14 +153,15 @@ class AuthViewModel @Inject constructor(
     }
 
     fun resetPassword(email: String) {
-        if (email.isBlank()) {
+        val normalizedEmail = email.trim()
+        if (normalizedEmail.isBlank()) {
             _uiState.value = AuthUiState.Error("Please enter your email address first.")
             return
         }
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             try {
-                authRepository.resetPassword(email)
+                authRepository.resetPassword(normalizedEmail)
                 _uiState.value = AuthUiState.Info("Reset link sent! Please check your inbox.")
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(e.message ?: "Failed to send reset email")
@@ -169,15 +174,15 @@ class AuthViewModel @Inject constructor(
             _uiState.value = AuthUiState.Loading
             try {
                 val uid = authRepository.signInWithCredential(credential)
-                val email = authRepository.currentUserEmail ?: ""
+                val normalizedEmail = (authRepository.currentUserEmail ?: "").trim()
                 
                 // Harden Google Login: check verification status
                 if (!authRepository.isEmailVerified) {
-                    _uiState.value = AuthUiState.Unverified(email)
+                    _uiState.value = AuthUiState.Unverified(normalizedEmail)
                     return@launch
                 }
                 
-                handleLogin(uid, email, deviceId)
+                handleLogin(uid, normalizedEmail, deviceId)
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(e.message ?: "Google sign in failed")
             }

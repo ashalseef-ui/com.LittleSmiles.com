@@ -3,7 +3,6 @@ package com.LittleSmiles.com.ui.features.auth
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.LittleSmiles.com.core.domain.repository.AuthRepository
 import com.LittleSmiles.com.core.domain.repository.BillingRepository
 import com.LittleSmiles.com.core.domain.repository.PremiumProduct
 import com.LittleSmiles.com.core.domain.repository.PremiumProductId
@@ -19,8 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UpgradeViewModel @Inject constructor(
-    private val billingRepository: BillingRepository,
-    private val authRepository: AuthRepository
+    private val billingRepository: BillingRepository
 ) : ViewModel() {
 
     val products: StateFlow<List<PremiumProduct>> = billingRepository.products
@@ -29,11 +27,7 @@ class UpgradeViewModel @Inject constructor(
     private val _purchaseState = MutableStateFlow<PurchaseResult?>(null)
     val purchaseState: StateFlow<PurchaseResult?> = _purchaseState.asStateFlow()
 
-    private val _isGuest = MutableStateFlow(authRepository.currentUserId == null)
-    val isGuest: StateFlow<Boolean> = _isGuest.asStateFlow()
-
     fun bootstrap() {
-        _isGuest.value = authRepository.currentUserId == null
         viewModelScope.launch {
             runCatching { billingRepository.startConnection() }
         }

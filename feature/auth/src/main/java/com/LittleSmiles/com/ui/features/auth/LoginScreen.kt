@@ -96,7 +96,9 @@ fun LoginScreen(
     }
 
     LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.Success) onLoginSuccess()
+        if (uiState is AuthUiState.Success) {
+            onLoginSuccess()
+        }
     }
 
     val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
@@ -110,10 +112,10 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp, vertical = 12.dp),
+                .padding(horizontal = 18.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header Row
+            // Header Row - Compact
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -123,21 +125,36 @@ fun LoginScreen(
                         (context as? Activity)?.finishAffinity()
                         exitProcess(0)
                     },
-                    modifier = Modifier.background(Color.White.copy(alpha = 0.5f), CircleShape)
+                    modifier = Modifier.size(36.dp).background(Color.White.copy(alpha = 0.5f), CircleShape)
                 ) {
-                    Icon(Icons.Default.PowerSettingsNew, "Exit App", tint = ErrorRed)
+                    Icon(Icons.Default.PowerSettingsNew, "Exit", tint = ErrorRed, modifier = Modifier.size(20.dp))
                 }
             }
 
-            Spacer(modifier = Modifier.height(9.dp))
+            Spacer(modifier = Modifier.height(48.dp))
             JoyfulBranding()
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
             CloudLoginCard(isLoading) {
                 Column(
-                    modifier = Modifier.padding(15.dp),
+                    modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Text(
+                        "✨ EARLY ACCESS 2026 ✨",
+                        color = RainbowOrange,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    Text(
+                        "Unlock all games for free!",
+                        color = SlateText,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 20.dp)
+                    )
+
                     JoyfulTextField(
                         value = email,
                         onValueChange = { email = it; viewModel.clearState() },
@@ -148,7 +165,7 @@ fun LoginScreen(
                         enabled = !isLoading
                     )
 
-                    Spacer(modifier = Modifier.height(9.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     JoyfulTextField(
                         value = password,
@@ -175,41 +192,45 @@ fun LoginScreen(
                                 colors = CheckboxDefaults.colors(checkedColor = RainbowBlue),
                                 modifier = Modifier.scale(0.85f)
                             )
-                            Text("Save me!", fontSize = 13.sp, color = SlateText, fontWeight = FontWeight.Bold)
+                            Text("Remember Email", fontSize = 12.sp, color = SlateText, fontWeight = FontWeight.Bold)
                         }
                         TextButton(
                             onClick = { 
-                                if (email.isBlank()) {
+                                if (email.trim().isBlank()) {
                                     viewModel.setExternalError("Enter email first to reset!")
                                 } else {
-                                    viewModel.resetPassword(email)
+                                    viewModel.resetPassword(email.trim())
                                 }
                             }, 
                             enabled = !isLoading
                         ) {
-                            Text("Forgot Pwd?", color = SkyBlueDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Text("Forgot Pwd?", color = SkyBlueDark, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     JoyfulButton(
                         text = "Let's Go!",
-                        onClick = { viewModel.signIn(email, password, deviceId) },
+                        onClick = { viewModel.signIn(email.trim(), password.trim(), deviceId) },
                         backgroundColor = RainbowGreen,
                         enabled = isEmailValid && isPasswordSecure && !isLoading,
                         isLoading = isLoading
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    TextButton(onClick = { viewModel.signUp(email, password, deviceId) }, enabled = isEmailValid && isPasswordSecure && !isLoading) {
+                    TextButton(
+                        onClick = { viewModel.signUp(email.trim(), password.trim(), deviceId) }, 
+                        enabled = isEmailValid && isPasswordSecure && !isLoading,
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
                         Text("New? Create Account!", color = SkyBlueDark, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text("✨ OR ✨", color = SkyBlueDark.copy(alpha = 0.5f), fontWeight = FontWeight.Black, fontSize = 14.sp)
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("✨ OR ✨", color = SkyBlueDark.copy(alpha = 0.3f), fontWeight = FontWeight.Black, fontSize = 13.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     JoyfulGoogleButton(
                         onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
@@ -262,34 +283,14 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
-
-            // Soft freemium entry — free games only, drives installs & habit
-            TextButton(
-                onClick = onContinueFree,
-                modifier = Modifier.squishClickable { onContinueFree() }
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        tint = RainbowOrange,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        "Continue with Free Games",
-                        color = RainbowOrange,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 16.sp
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(16.dp))
+            
             Text(
-                "Tracing · Colors · Shapes — forever free",
-                color = SlateText,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium
+                "Parental Supervision Required",
+                color = SlateText.copy(alpha = 0.6f),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -306,16 +307,16 @@ fun JoyfulSkyBackground() {
     )
     
     Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(skyColor1, SkyBlueLight)))) {
-        // Floating Clouds
+        // Floating Clouds - Decelerated
         repeat(5) { i ->
-            val duration = 15000 + (i * 2000)
-            val delay = i * 1000
+            val duration = 22000 + (i * 3000)
+            val delay = i * 1500
             FloatingCloud(duration, delay, offsetMultiplier = i)
         }
         
-        // Twinkling stars / sparkles
-        repeat(15) { i ->
-            Sparkle(delay = i * 200)
+        // Twinkling stars / sparkles - Decelerated
+        repeat(12) { i ->
+            Sparkle(delay = i * 400)
         }
     }
 }
@@ -357,7 +358,7 @@ fun Sparkle(delay: Int) {
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            tween(1000, delayMillis = delay, easing = FastOutSlowInEasing),
+            tween(1500, delayMillis = delay, easing = FastOutSlowInEasing),
             RepeatMode.Reverse
         ),
         label = "scale"
@@ -397,7 +398,7 @@ fun JoyfulBranding() {
             RainbowTitle("Little Buds Academy")
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         Surface(
             color = RainbowOrange,
@@ -417,29 +418,43 @@ fun JoyfulBranding() {
 @Composable
 fun RainbowTitle(text: String) {
     val colors = listOf(RainbowRed, RainbowOrange, RainbowYellow, RainbowGreen, RainbowBlue, RainbowViolet)
-    Row {
-        text.forEachIndexed { index, char ->
-            val infiniteTransition = rememberInfiniteTransition(label = "char_$index")
-            val scale by infiniteTransition.animateFloat(
-                initialValue = 1f,
-                targetValue = 1.15f,
-                animationSpec = infiniteRepeatable(
-                    tween(400, delayMillis = index * 100, easing = FastOutSlowInEasing),
-                    RepeatMode.Reverse
-                ),
-                label = "scale"
-            )
-            
-            Text(
-                text = char.toString(),
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Black,
-                color = colors[index % colors.size],
-                modifier = Modifier.graphicsLayer { 
-                    scaleX = scale
-                    scaleY = scale
+    val words = text.split(" ")
+    
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        words.chunked(2).forEach { lineWords ->
+            Row(horizontalArrangement = Arrangement.Center) {
+                lineWords.forEach { word ->
+                    Row {
+                        word.forEachIndexed { index, char ->
+                            val infiniteTransition = rememberInfiniteTransition(label = "char_${word}_$index")
+                            val scale by infiniteTransition.animateFloat(
+                                initialValue = 1f,
+                                targetValue = 1.1f,
+                                animationSpec = infiniteRepeatable(
+                                    tween(600, delayMillis = index * 100, easing = FastOutSlowInEasing),
+                                    RepeatMode.Reverse
+                                ),
+                                label = "scale"
+                            )
+                            
+                            Text(
+                                text = char.toString(),
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.Black,
+                                color = colors[(index + word.length) % colors.size],
+                                letterSpacing = 2.sp,
+                                modifier = Modifier.graphicsLayer { 
+                                    scaleX = scale
+                                    scaleY = scale
+                                }
+                            )
+                        }
+                    }
+                    if (word != lineWords.last()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
                 }
-            )
+            }
         }
     }
 }
@@ -458,20 +473,17 @@ fun CloudLoginCard(isLoading: Boolean, content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .widthIn(max = 400.dp)
+            .widthIn(max = 480.dp)
             .border(
-                4.dp,
+                2.dp,
                 Brush.linearGradient(
-                    borderColors,
-                    start = Offset(borderOffset, borderOffset),
-                    end = Offset(borderOffset + 500f, borderOffset + 500f),
-                    tileMode = TileMode.Mirror
+                    listOf(SkyBlueLight, SkyBluePrimary)
                 ),
                 RoundedCornerShape(40.dp)
             ),
         color = Color.White.copy(alpha = 0.9f),
         shape = RoundedCornerShape(40.dp),
-        shadowElevation = 8.dp
+        shadowElevation = 12.dp
     ) {
         content()
         if (isLoading) {
@@ -540,7 +552,7 @@ fun JoyfulButton(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .height(56.dp)
             .squishClickable(onClick = { if (enabled && !isLoading) onClick() }),
         color = if (enabled) backgroundColor else Color.LightGray,
         shape = RoundedCornerShape(24.dp),
@@ -550,7 +562,7 @@ fun JoyfulButton(
             Text(
                 text = text,
                 color = Color.White,
-                fontSize = 20.sp,
+                fontSize = 19.sp,
                 fontWeight = FontWeight.Black
             )
         }
@@ -578,7 +590,7 @@ fun JoyfulGoogleButton(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.CloudQueue, contentDescription, tint = RainbowBlue)
+            Icon(Icons.Default.CloudQueue, contentDescription, tint = RainbowBlue, modifier = Modifier.size(22.dp))
             Spacer(Modifier.width(12.dp))
             Text("Fly with Google", color = Color(0xFF1F2937), fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
         }

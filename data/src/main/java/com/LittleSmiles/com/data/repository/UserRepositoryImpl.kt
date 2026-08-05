@@ -76,7 +76,6 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun createUserProfile(user: User) {
         runCatching {
-            // Entitlement fields: trial starts server-side AFTER email verification.
             val userData = hashMapOf(
                 "email" to user.email,
                 "deviceId" to null,
@@ -89,19 +88,19 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateDeviceId(uid: String, deviceId: String) {
-        runCatching {
+        writeWithLogging("Failed to update device ID") {
             db.collection("users").document(uid).update("deviceId", deviceId).await()
-        }.onFailure { Timber.e(it, "Failed to update device ID") }
+        }
     }
 
     override suspend fun updateUsage(uid: String, minutes: Long) {
-        runCatching {
+        writeWithLogging("Failed to update usage") {
             db.collection("users").document(uid).update("minutesUsedToday", minutes).await()
-        }.onFailure { Timber.e(it, "Failed to update usage") }
+        }
     }
 
     override suspend fun logLoginTimestamp(uid: String) {
-        runCatching {
+        writeWithLogging("Failed to log login timestamp for uid: $uid") {
             val timestampData = hashMapOf(
                 "lastLogin" to com.google.firebase.firestore.FieldValue.serverTimestamp()
             )
@@ -110,17 +109,17 @@ class UserRepositoryImpl @Inject constructor(
                 mapOf("lastLogin" to com.google.firebase.firestore.FieldValue.serverTimestamp()),
                 com.google.firebase.firestore.SetOptions.merge()
             ).await()
-        }.onFailure { Timber.e(it, "Failed to log login timestamp for uid: $uid") }
+        }
     }
 
     override suspend fun resetDeviceId(uid: String) {
-        runCatching {
+        writeWithLogging("Failed to reset device ID") {
             db.collection("users").document(uid).update("deviceId", null).await()
-        }.onFailure { Timber.e(it, "Failed to reset device ID") }
+        }
     }
 
     override suspend fun startTrial(uid: String, deviceId: String) {
-        runCatching {
+        writeWithLogging("Failed to start trial for uid: $uid") {
             val updateData = hashMapOf(
                 "deviceId" to deviceId,
                 "trialStartDate" to com.google.firebase.firestore.FieldValue.serverTimestamp()
@@ -129,7 +128,16 @@ class UserRepositoryImpl @Inject constructor(
                 updateData,
                 com.google.firebase.firestore.SetOptions.merge()
             ).await()
-        }.onFailure { Timber.e(it, "Failed to start trial for uid: $uid") }
+        }
+    }
+
+    private suspend fun <T> writeWithLogging(message: String, block: suspend () -> T): T {
+        return try {
+            block()
+        } catch (e: Exception) {
+            Timber.e(e, message)
+            throw e
+        }
     }
 
     override suspend fun syncPremiumStatus(

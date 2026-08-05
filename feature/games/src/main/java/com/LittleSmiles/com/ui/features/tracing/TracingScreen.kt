@@ -123,9 +123,10 @@ fun TracingScreen(
         if (canvasSize.width <= 0 || canvasSize.height <= 0) return@remember null
         val bitmap = Bitmap.createBitmap(canvasSize.width, canvasSize.height, Bitmap.Config.ALPHA_8)
         val canvas = AndroidCanvas(bitmap)
+        val targetTextSize = minOf(canvasSize.width * 0.72f, canvasSize.height * 0.65f)
         val paint = Paint().apply {
             color = android.graphics.Color.BLACK
-            textSize = with(density) { 488.sp.toPx() }
+            textSize = targetTextSize
             typeface = Typeface.DEFAULT_BOLD
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
@@ -216,9 +217,10 @@ fun TracingScreen(
                 ) {
                     if (!isMatched) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
+                                    val targetTextSize = minOf(size.width * 0.72f, size.height * 0.65f)
                             val paint = Paint().apply {
                                 color = android.graphics.Color.LTGRAY
-                                textSize = 488.sp.toPx()
+                                textSize = targetTextSize
                                 typeface = Typeface.DEFAULT_BOLD
                                 textAlign = Paint.Align.CENTER
                                 isAntiAlias = true
@@ -226,7 +228,7 @@ fun TracingScreen(
                             
                             val outlinePaint = Paint().apply {
                                 color = android.graphics.Color.DKGRAY
-                                textSize = 488.sp.toPx()
+                                textSize = targetTextSize
                                 typeface = Typeface.DEFAULT_BOLD
                                 textAlign = Paint.Align.CENTER
                                 style = Paint.Style.STROKE
