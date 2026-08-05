@@ -140,15 +140,15 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 Surface(
                     color = RainbowOrange.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, RainbowOrange.copy(alpha = 0.5f))
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(2.dp, RainbowOrange.copy(alpha = 0.5f))
                 ) {
                     Text(
                         "✨ EARLY ACCESS 2026: ALL GAMES FREE ✨",
                         color = RainbowOrange,
                         fontWeight = FontWeight.Black,
-                        fontSize = 11.sp,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                     )
                 }
             }
