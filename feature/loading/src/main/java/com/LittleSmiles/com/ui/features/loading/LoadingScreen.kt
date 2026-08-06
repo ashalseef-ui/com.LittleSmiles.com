@@ -1,114 +1,142 @@
 package com.LittleSmiles.com.ui.features.loading
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.LittleSmiles.com.core.ui.R
+import com.LittleSmiles.com.ui.components.CrystalAmbientBackground
+import com.LittleSmiles.com.ui.theme.*
 
 @Composable
 fun LoadingScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Shared Crystal Ambient Background
+        CrystalAmbientBackground()
+
         Column(
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Integration of the same App Logo for visual continuity
-            Image(
-                painter = painterResource(id = R.drawable.app_logo),
-                contentDescription = null,
+            // Pure Floating Logo
+            Box(
                 modifier = Modifier
-                    .size(120.dp)
-                    .clip(RoundedCornerShape(24.dp))
-            )
+                    .size(180.dp)
+                    .graphicsLayer { shadowElevation = 16f },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.app_logo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(RoundedCornerShape(36.dp))
+                )
+            }
             
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Production Tip: Use Lottie for high-quality kid-friendly animations.
-            // When you have a JSON asset, uncomment below and remove BouncingBallsAnimation()
-            /*
-            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading_animation))
-            LottieAnimation(
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-                modifier = Modifier.size(150.dp)
-            )
-            */
-            
-            BouncingBallsAnimation()
-            
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(64.dp))
+
+            // Branding with the new Crystal style
+            val brandName = "Little Buds Academy"
+            brandName.split(" ").chunked(2).forEach { lineWords ->
+                Row(horizontalArrangement = Arrangement.Center) {
+                    lineWords.forEach { word ->
+                        Text(
+                            text = word,
+                            fontSize = 48.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            letterSpacing = 2.sp,
+                            modifier = Modifier.graphicsLayer { 
+                                shadowElevation = 12f
+                            }
+                        )
+                        if (word != lineWords.last()) Spacer(Modifier.width(12.dp))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Little Buds Academy",
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 42.sp
-                )
+                text = "Magic is Loading...",
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
             )
-            Text(
-                text = "Loading Fun...",
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 28.sp
-                )
-            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+            
+            CrystalLoadingDots()
         }
     }
 }
 
 @Composable
-fun BouncingBallsAnimation() {
-    val infiniteTransition = rememberInfiniteTransition(label = "bouncing")
+fun CrystalLoadingDots() {
+    val infiniteTransition = rememberInfiniteTransition(label = "loading")
     
-    val animationColors = listOf(
-        Color(0xFF42A5F5), // Blue
-        Color(0xFF66BB6A), // Green
-        Color(0xFFFFA726), // Orange
-        Color(0xFFAB47BC)  // Purple
+    val dotColors = listOf(
+        RainbowRed, 
+        RainbowYellow,
+        RainbowBlue
     )
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        animationColors.forEachIndexed { index, color ->
-            val delay = index * 150
-            val yOffset by infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = -30f,
+        dotColors.forEachIndexed { index, color ->
+            val delay = index * 200
+            val scale by infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.5f,
                 animationSpec = infiniteRepeatable(
                     animation = tween(durationMillis = 600, delayMillis = delay, easing = FastOutSlowInEasing),
                     repeatMode = RepeatMode.Reverse
                 ),
-                label = "yOffset"
+                label = "scale"
+            )
+            val alpha by infiniteTransition.animateFloat(
+                initialValue = 0.3f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 600, delayMillis = delay, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "alpha"
             )
 
-            Canvas(
+            Surface(
                 modifier = Modifier
-                    .size(20.dp)
-                    .offset { IntOffset(x = 0, y = yOffset.dp.roundToPx()) }
-            ) {
-                drawCircle(color = color)
-            }
+                    .size(12.dp)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                        this.alpha = alpha
+                    },
+                color = color,
+                shape = CircleShape,
+                shadowElevation = 8.dp
+            ) {}
         }
     }
 }
+

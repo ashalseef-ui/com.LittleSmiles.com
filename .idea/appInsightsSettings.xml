@@ -23,10 +23,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.LittleSmiles.com" />
-                  <option name="mobileSdkAppId" value="1:998108707188:android:395c0aeba3a93062021421" />
-                  <option name="projectId" value="little-smiles-fb21b" />
-                  <option name="projectNumber" value="998108707188" />
+                  <option name="appId" value="com.Shabbir.BabyBrush" />
+                  <option name="mobileSdkAppId" value="1:875579778818:android:41042942bb8345db16c41b" />
+                  <option name="projectId" value="little-buds-academy" />
+                  <option name="projectNumber" value="875579778818" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

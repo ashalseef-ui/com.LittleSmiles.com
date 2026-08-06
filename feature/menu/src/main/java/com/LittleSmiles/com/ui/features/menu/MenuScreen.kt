@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
@@ -92,8 +91,6 @@ fun MenuScreen(
 
     var showParentalGate by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
-    var showUpgradeGate by remember { mutableStateOf(false) }
-    var pendingLockedRoute by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
@@ -127,25 +124,6 @@ fun MenuScreen(
             onSuccess = {
                 showParentalGate = false
                 navController.navigate(Screen.ParentalHub.route)
-            }
-        )
-    }
-
-    if (showUpgradeGate) {
-        ParentalGateDialog(
-            strength = ParentalGateStrength.STRICT,
-            onDismiss = {
-                showUpgradeGate = false
-                pendingLockedRoute = null
-            },
-            onSuccess = {
-                showUpgradeGate = false
-                pendingLockedRoute = null
-                if (!entitlement.isSignedIn) {
-                    navController.navigate(Screen.Login.route)
-                } else {
-                    navController.navigate(Screen.Upgrade.route)
-                }
             }
         )
     }
@@ -234,20 +212,13 @@ fun MenuScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(items, key = { it.activity.id }) { item ->
-                    val unlocked = entitlement.canAccess(item.activity)
                     var isNavigating by remember { mutableStateOf(false) }
 
                     MenuButton(
                         data = item,
-                        locked = !unlocked,
-                        animateBorder = unlocked
+                        locked = false,
+                        animateBorder = true
                     ) {
-                        if (!unlocked) {
-                            tts.speak("Ask a grown-up to unlock this!", SpeechPriority.MEDIUM)
-                            pendingLockedRoute = item.route
-                            showUpgradeGate = true
-                            return@MenuButton
-                        }
                         if (isNavigating) return@MenuButton
                         isNavigating = true
                         tts.speak("Let's play ${item.title}!", SpeechPriority.MEDIUM)

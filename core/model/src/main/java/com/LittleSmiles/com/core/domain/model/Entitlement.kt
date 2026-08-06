@@ -10,19 +10,16 @@ package com.LittleSmiles.com.core.domain.model
 enum class AccessTier {
     /** Content unlocked for verified users. */
     FREE,
-    /** Full catalog during the one-time 14-day trial. */
-    TRIAL,
     /** Paid full access. */
     PREMIUM
 }
 
 data class Entitlement(
     val tier: AccessTier,
-    val trialDaysLeft: Long = 0,
     val isSignedIn: Boolean = false
 ) {
     val hasFullAccess: Boolean
-        get() = tier == AccessTier.TRIAL || tier == AccessTier.PREMIUM
+        get() = tier == AccessTier.PREMIUM
 
     fun canAccess(activity: LearningActivityType): Boolean =
         hasFullAccess || activity.isFree
@@ -36,7 +33,6 @@ data class Entitlement(
     companion object {
         val Default: Entitlement = Entitlement(
             tier = AccessTier.FREE,
-            trialDaysLeft = 0,
             isSignedIn = false
         )
 
@@ -46,7 +42,6 @@ data class Entitlement(
             // 2026 EARLY ACCESS: All verified users get full access automatically.
             return Entitlement(
                 tier = AccessTier.PREMIUM,
-                trialDaysLeft = 0,
                 isSignedIn = true
             )
         }

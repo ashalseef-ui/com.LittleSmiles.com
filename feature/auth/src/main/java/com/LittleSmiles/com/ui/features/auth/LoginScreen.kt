@@ -21,8 +21,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -49,7 +47,6 @@ import kotlin.system.exitProcess
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onContinueFree: () -> Unit = onLoginSuccess,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -106,13 +103,13 @@ fun LoginScreen(
     val isLoading = uiState is AuthUiState.Loading
 
     Box(modifier = Modifier.fillMaxSize()) {
-        JoyfulSkyBackground()
+        CrystalAmbientBackground()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp, vertical = 6.dp),
+                .padding(horizontal = 20.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header Row - Compact
@@ -125,182 +122,179 @@ fun LoginScreen(
                         (context as? Activity)?.finishAffinity()
                         exitProcess(0)
                     },
-                    modifier = Modifier.size(36.dp).background(Color.White.copy(alpha = 0.5f), CircleShape)
+                    modifier = Modifier.size(36.dp).background(Color.White.copy(alpha = 0.2f), CircleShape)
                 ) {
-                    Icon(Icons.Default.PowerSettingsNew, "Exit", tint = ErrorRed, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.PowerSettingsNew, "Exit", tint = Color.White, modifier = Modifier.size(20.dp))
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(48.dp))
+            
+            // Integrated Branding
+            val brandName = "Little Buds Academy"
+            brandName.split(" ").chunked(2).forEach { lineWords ->
+                Row(horizontalArrangement = Arrangement.Center) {
+                    lineWords.forEach { word ->
+                        Text(
+                            text = word,
+                            fontSize = 44.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
+                            letterSpacing = 2.sp
+                        )
+                        if (word != lineWords.last()) Spacer(Modifier.width(12.dp))
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                "✨ EARLY ACCESS 2026: ALL GAMES FREE ✨",
+                color = Color.White.copy(alpha = 0.9f),
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                letterSpacing = 1.sp
+            )
+            
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // --- Floating Auth Content ---
             Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 480.dp)
+                    .padding(horizontal = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                JoyfulBranding()
-                Spacer(modifier = Modifier.height(12.dp))
-                Surface(
-                    color = RainbowOrange.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(2.dp, RainbowOrange.copy(alpha = 0.5f))
+                Text(
+                    "Parental Sign In",
+                    color = Color.White,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier.padding(bottom = 22.dp)
+                )
+
+                CrystalTextField(
+                    value = email,
+                    onValueChange = { email = it; viewModel.clearState() },
+                    label = "Parent's Email",
+                    icon = Icons.Default.Email,
+                    keyboardType = KeyboardType.Email,
+                    error = if (email.isNotEmpty() && !isEmailValid) "Oops! Check your email." else null,
+                    enabled = !isLoading
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                CrystalTextField(
+                    value = password,
+                    onValueChange = { password = it; viewModel.clearState() },
+                    label = "Secure Password",
+                    icon = Icons.Default.Lock,
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true,
+                    passwordVisible = passwordVisible,
+                    onTogglePassword = { passwordVisible = !passwordVisible },
+                    error = if (password.isNotEmpty() && !isPasswordSecure) "At least 6 characters" else null,
+                    enabled = !isLoading
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 11.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        "✨ EARLY ACCESS 2026: ALL GAMES FREE ✨",
-                        color = RainbowOrange,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-
-            CloudLoginCard(isLoading) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Value Proposition moved to header, Card is pure auth now
-                    Text(
-                        "Parent Login",
-                        color = SkyBlueDark,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    JoyfulTextField(
-                        value = email,
-                        onValueChange = { email = it; viewModel.clearState() },
-                        label = "Parent's Email",
-                        icon = Icons.Default.Email,
-                        keyboardType = KeyboardType.Email,
-                        error = if (email.isNotEmpty() && !isEmailValid) "Oops! Check your email." else null,
-                        enabled = !isLoading
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    JoyfulTextField(
-                        value = password,
-                        onValueChange = { password = it; viewModel.clearState() },
-                        label = "Password",
-                        icon = Icons.Default.Lock,
-                        keyboardType = KeyboardType.Password,
-                        isPassword = true,
-                        passwordVisible = passwordVisible,
-                        onTogglePassword = { passwordVisible = !passwordVisible },
-                        error = if (password.isNotEmpty() && !isPasswordSecure) "Need at least 6 characters!" else null,
-                        enabled = !isLoading
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Surface(
-                            onClick = { rememberMe = !rememberMe },
-                            color = Color.Transparent,
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp)
-                            ) {
-                                Checkbox(
-                                    checked = rememberMe,
-                                    onCheckedChange = null, // Handled by Surface click
-                                    colors = CheckboxDefaults.colors(checkedColor = RainbowBlue),
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Remember Email", fontSize = 13.sp, color = SlateText, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                        TextButton(
-                            onClick = { 
-                                if (email.trim().isBlank()) {
-                                    viewModel.setExternalError("Enter email first to reset!")
-                                } else {
-                                    viewModel.resetPassword(email.trim())
-                                }
-                            }, 
-                            enabled = !isLoading
-                        ) {
-                            Text("Forgot Pwd?", color = SkyBlueDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    JoyfulButton(
-                        text = "Let's Go!",
-                        onClick = { viewModel.signIn(email.trim(), password.trim(), deviceId) },
-                        backgroundColor = RainbowGreen,
-                        enabled = isEmailValid && isPasswordSecure && !isLoading,
-                        isLoading = isLoading
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    TextButton(
-                        onClick = { viewModel.signUp(email.trim(), password.trim(), deviceId) }, 
-                        enabled = isEmailValid && isPasswordSecure && !isLoading,
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Text("New? Create Account!", color = SkyBlueDark, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("✨ OR ✨", color = SkyBlueDark.copy(alpha = 0.3f), fontWeight = FontWeight.Black, fontSize = 13.sp)
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    JoyfulGoogleButton(
-                        onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
-                        enabled = !isLoading,
-                        contentDescription = "Sign in with Google"
-                    )
-
-                    // Feedback messages
-                    AnimatedVisibility(visible = uiState is AuthUiState.Error || uiState is AuthUiState.Info || uiState is AuthUiState.Unverified) {
-                        val message = when(val s = uiState) {
-                            is AuthUiState.Error -> s.message
-                            is AuthUiState.Info -> s.message
-                            is AuthUiState.Unverified -> "Please check ${s.email} to verify your account!"
-                            else -> ""
-                        }
-                        val color = if (uiState is AuthUiState.Error) ErrorRed else SuccessGreen
-                        
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = message,
-                                color = color,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(top = 9.dp)
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { rememberMe = !rememberMe }) {
+                        Checkbox(
+                            checked = rememberMe,
+                            onCheckedChange = null,
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = Color.White,
+                                uncheckedColor = Color.White.copy(alpha = 0.4f),
+                                checkmarkColor = SkyBluePrimary
                             )
-                            
-                            if (uiState is AuthUiState.Unverified) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Center
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("Remember Me", fontSize = 15.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                    TextButton(
+                        onClick = { 
+                            if (email.trim().isBlank()) {
+                                viewModel.setExternalError("Enter email first!")
+                            } else {
+                                viewModel.resetPassword(email.trim())
+                            }
+                        }, 
+                        enabled = !isLoading
+                    ) {
+                        Text("Forgot Pwd?", color = Color.White.copy(alpha = 0.8f), fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                LiquidButton(
+                    text = "Let's Play!",
+                    onClick = { viewModel.signIn(email.trim(), password.trim(), deviceId) },
+                    enabled = isEmailValid && isPasswordSecure && !isLoading,
+                    isLoading = isLoading
+                )
+
+                Spacer(modifier = Modifier.height(13.dp))
+
+                TextButton(
+                    onClick = { viewModel.signUp(email.trim(), password.trim(), deviceId) }, 
+                    enabled = isEmailValid && isPasswordSecure && !isLoading
+                ) {
+                    Text("New Here? Create Account", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                }
+
+                Spacer(modifier = Modifier.height(22.dp))
+                Text("✨ OR ✨", color = Color.White.copy(alpha = 0.3f), fontWeight = FontWeight.Black, fontSize = 13.sp)
+                Spacer(modifier = Modifier.height(22.dp))
+
+                CrystalGoogleButton(
+                    onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
+                    enabled = !isLoading
+                )
+
+                // Feedback messages
+                AnimatedVisibility(visible = (uiState is AuthUiState.Error || uiState is AuthUiState.Info || uiState is AuthUiState.Unverified)) {
+                    val (message, color) = when(val s = uiState) {
+                        is AuthUiState.Error -> s.message to Color(0xFFFDA4AF)
+                        is AuthUiState.Info -> s.message to Color.White
+                        is AuthUiState.Unverified -> "Please check ${s.email} to verify!" to Color.White
+                        else -> "" to Color.White
+                    }
+                    
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = message,
+                            color = color,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 11.dp)
+                        )
+                        
+                        if (uiState is AuthUiState.Unverified) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                TextButton(
+                                    onClick = { viewModel.resendVerification() },
+                                    enabled = resendTimer == 0
                                 ) {
-                                    TextButton(
-                                        onClick = { viewModel.resendVerification() },
-                                        enabled = resendTimer == 0
-                                    ) {
-                                        Text(
-                                            text = if (resendTimer > 0) "Resend in ${resendTimer}s" else "Resend Email",
-                                            color = if (resendTimer > 0) Color.Gray else RainbowBlue,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                    TextButton(onClick = { viewModel.refreshVerificationStatus(email, deviceId) }) {
-                                        Text("I've Verified!", color = RainbowGreen, fontWeight = FontWeight.Bold)
-                                    }
+                                    Text(
+                                        text = if (resendTimer > 0) "Resend in ${resendTimer}s" else "Resend Email",
+                                        color = if (resendTimer > 0) Color.White.copy(alpha = 0.4f) else Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                TextButton(onClick = { viewModel.refreshVerificationStatus(email, deviceId) }) {
+                                    Text("I've Verified!", color = Color.White, fontWeight = FontWeight.Black)
                                 }
                             }
                         }
@@ -308,211 +302,23 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-fun JoyfulSkyBackground() {
-    val infiniteTransition = rememberInfiniteTransition(label = "sky")
-    val skyColor1 by infiniteTransition.animateColor(
-        initialValue = Color(0xFFF0F9FF),
-        targetValue = Color(0xFFE0F2FE),
-        animationSpec = infiniteRepeatable(tween(4000, easing = LinearEasing), RepeatMode.Reverse),
-        label = "c1"
-    )
-    
-    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(skyColor1, SkyBlueLight)))) {
-        // Floating Clouds - Decelerated
-        repeat(5) { i ->
-            val duration = 22000 + (i * 3000)
-            val delay = i * 1500
-            FloatingCloud(duration, delay, offsetMultiplier = i)
-        }
-        
-        // Twinkling stars / sparkles - Decelerated
-        repeat(12) { i ->
-            Sparkle(delay = i * 400)
-        }
-    }
-}
-
-@Composable
-fun FloatingCloud(duration: Int, delay: Int, offsetMultiplier: Int) {
-    val infiniteTransition = rememberInfiniteTransition(label = "cloud")
-    val xProgress by infiniteTransition.animateFloat(
-        initialValue = -0.2f,
-        targetValue = 1.2f,
-        animationSpec = infiniteRepeatable(
-            tween(duration, delayMillis = delay, easing = LinearEasing),
-            RepeatMode.Restart
-        ),
-        label = "x"
-    )
-    
-    val yOffset = (50 + (offsetMultiplier * 120)).dp
-    
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .offset(y = yOffset)
-            .graphicsLayer { translationX = xProgress * size.width }
-    ) {
-        Icon(
-            imageVector = Icons.Default.Cloud,
-            contentDescription = null,
-            tint = Color.White.copy(alpha = 0.4f),
-            modifier = Modifier.size(100.dp + (offsetMultiplier * 20).dp)
-        )
-    }
-}
-
-@Composable
-fun Sparkle(delay: Int) {
-    val infiniteTransition = rememberInfiniteTransition(label = "sparkle")
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            tween(1500, delayMillis = delay, easing = FastOutSlowInEasing),
-            RepeatMode.Reverse
-        ),
-        label = "scale"
-    )
-    
-    val x = remember { (0..100).random() / 100f }
-    val y = remember { (0..100).random() / 100f }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .graphicsLayer {
-                translationX = x * size.width
-                translationY = y * size.height
-                scaleX = scale
-                scaleY = scale
-                alpha = scale
-            }
-    ) {
-        Icon(Icons.Default.AutoAwesome, null, tint = RainbowYellow, modifier = Modifier.size(16.dp))
-    }
-}
-
-@Composable
-fun JoyfulBranding() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        val infiniteTransition = rememberInfiniteTransition(label = "brand")
-        val bounce by infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = -15f,
-            animationSpec = infiniteRepeatable(tween(600, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-            label = "bounce"
-        )
-
-        Box(modifier = Modifier.graphicsLayer { translationY = bounce }) {
-            RainbowTitle("Little Buds Academy")
-        }
-        
-        Spacer(modifier = Modifier.height(4.dp))
-        
-        Surface(
-            color = RainbowOrange,
-            shape = RoundedCornerShape(12.dp)
-        ) {
+            Spacer(modifier = Modifier.height(34.dp))
+            
             Text(
-                "LEARNING IS FUN!",
-                color = Color.White,
+                "Verified Parent Portal",
+                color = Color.White.copy(alpha = 0.6f),
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
-@Composable
-fun RainbowTitle(text: String) {
-    val colors = listOf(RainbowRed, RainbowOrange, RainbowYellow, RainbowGreen, RainbowBlue, RainbowViolet)
-    val words = text.split(" ")
-    
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        words.chunked(2).forEach { lineWords ->
-            Row(horizontalArrangement = Arrangement.Center) {
-                lineWords.forEach { word ->
-                    Row {
-                        word.forEachIndexed { index, char ->
-                            val infiniteTransition = rememberInfiniteTransition(label = "char_${word}_$index")
-                            val scale by infiniteTransition.animateFloat(
-                                initialValue = 1f,
-                                targetValue = 1.1f,
-                                animationSpec = infiniteRepeatable(
-                                    tween(600, delayMillis = index * 100, easing = FastOutSlowInEasing),
-                                    RepeatMode.Reverse
-                                ),
-                                label = "scale"
-                            )
-                            
-                            Text(
-                                text = char.toString(),
-                                fontSize = 36.sp,
-                                fontWeight = FontWeight.Black,
-                                color = colors[(index + word.length) % colors.size],
-                                letterSpacing = 2.sp,
-                                modifier = Modifier.graphicsLayer { 
-                                    scaleX = scale
-                                    scaleY = scale
-                                }
-                            )
-                        }
-                    }
-                    if (word != lineWords.last()) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                }
-            }
-        }
-    }
-}
+
 
 @Composable
-fun CloudLoginCard(isLoading: Boolean, content: @Composable () -> Unit) {
-    val borderColors = listOf(RainbowBlue, SkyBlueLight, RainbowBlue)
-    val infiniteTransition = rememberInfiniteTransition(label = "card")
-    val borderOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(tween(5000, easing = LinearEasing)),
-        label = "offset"
-    )
-
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(max = 480.dp)
-            .border(
-                2.dp,
-                Brush.linearGradient(
-                    listOf(SkyBlueLight, SkyBluePrimary)
-                ),
-                RoundedCornerShape(40.dp)
-            ),
-        color = Color.White.copy(alpha = 0.9f),
-        shape = RoundedCornerShape(40.dp),
-        shadowElevation = 12.dp
-    ) {
-        content()
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = RainbowBlue, strokeWidth = 6.dp)
-            }
-        }
-    }
-}
-
-@Composable
-fun JoyfulTextField(
+fun CrystalTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -528,35 +334,27 @@ fun JoyfulTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            label = { Text(label, fontWeight = FontWeight.Bold) },
+            label = { Text(label, color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Bold) },
             leadingIcon = {
-                Surface(
-                    shape = CircleShape,
-                    color = SkyBlueLight.copy(alpha = 0.5f),
-                    modifier = Modifier.padding(6.dp).size(32.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(icon, null, tint = SkyBlueDark, modifier = Modifier.size(18.dp))
-                    }
-                }
+                Icon(icon, null, tint = Color.White, modifier = Modifier.padding(start = 12.dp).size(22.dp))
             },
             trailingIcon = if (isPassword && onTogglePassword != null) {
                 {
                     IconButton(onClick = onTogglePassword) {
-                        Icon(if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null, tint = SlateText)
+                        Icon(if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null, tint = Color.White.copy(alpha = 0.6f))
                     }
                 }
             } else null,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = RainbowBlue,
-                unfocusedBorderColor = SkyBlueLight,
-                focusedContainerColor = Color(0xFFFEF9C3).copy(alpha = 0.4f),
-                unfocusedContainerColor = Color(0xFFF0F9FF).copy(alpha = 0.6f),
-                focusedLabelColor = RainbowBlue,
-                unfocusedLabelColor = SlateText,
-                cursorColor = RainbowBlue
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
+                focusedContainerColor = Color.White.copy(alpha = 0.25f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.15f),
+                cursorColor = Color.White
             ),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
@@ -565,92 +363,80 @@ fun JoyfulTextField(
             enabled = enabled
         )
         if (error != null) {
-            Text(error, color = ErrorRed, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 16.dp, top = 4.dp))
+            Text(error, color = Color(0xFFFDA4AF), fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 12.dp, top = 3.dp))
         }
     }
 }
 
 @Composable
-fun JoyfulButton(
+fun LiquidButton(
     text: String,
     onClick: () -> Unit,
-    backgroundColor: Color,
     enabled: Boolean = true,
     isLoading: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-    val offsetY = if (isPressed) 4.dp else 0.dp
+    val scale by animateFloatAsState(if (isPressed) 0.96f else 1f, label = "scale")
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .offset(y = offsetY)
+            .height(60.dp)
+            .graphicsLayer { 
+                scaleX = scale
+                scaleY = scale
+            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = enabled && !isLoading,
                 onClick = onClick
             ),
-        color = if (enabled) backgroundColor else Color.LightGray,
-        shape = RoundedCornerShape(28.dp),
-        shadowElevation = if (enabled && !isPressed) 6.dp else 1.dp,
-        border = BorderStroke(3.dp, if (enabled) backgroundColor.copy(alpha = 0.8f) else Color.Gray)
+        color = Color.Transparent,
+        shape = RoundedCornerShape(30.dp),
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.background(
+                Brush.linearGradient(
+                    listOf(Color(0xFF22C55E), Color(0xFF10B981), Color(0xFF06B6D4))
+                )
+            ),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
                 text = text,
                 color = Color.White,
-                fontSize = 19.sp,
-                fontWeight = FontWeight.Black
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.sp
             )
         }
     }
 }
 
 @Composable
-fun JoyfulGoogleButton(
+fun CrystalGoogleButton(
     onClick: () -> Unit,
-    enabled: Boolean,
-    contentDescription: String? = null
+    enabled: Boolean
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val offsetY = if (isPressed) 3.dp else 0.dp
-
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .offset(y = offsetY)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled,
-                onClick = onClick
-            ),
-        color = Color.White,
-        shape = RoundedCornerShape(28.dp),
-        border = BorderStroke(2.dp, SkyBlueLight),
-        shadowElevation = if (isPressed) 1.dp else 4.dp
+            .height(54.dp)
+            .clickable(enabled = enabled, onClick = onClick),
+        color = Color.White.copy(alpha = 0.15f),
+        shape = RoundedCornerShape(27.dp),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                shape = CircleShape,
-                color = SkyBlueLight.copy(alpha = 0.2f),
-                modifier = Modifier.size(32.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.CloudQueue, contentDescription, tint = RainbowBlue, modifier = Modifier.size(20.dp))
-                }
-            }
-            Spacer(Modifier.width(12.dp))
-            Text("Fly with Google", color = Color(0xFF1F2937), fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+            Icon(Icons.Default.CloudQueue, null, tint = Color.White, modifier = Modifier.size(24.dp))
+            Spacer(Modifier.width(14.dp))
+            Text("Login with Google", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }

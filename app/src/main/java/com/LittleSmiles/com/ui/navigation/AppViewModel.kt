@@ -9,26 +9,22 @@ import com.LittleSmiles.com.core.domain.model.Entitlement
 import com.LittleSmiles.com.core.domain.model.ProfileResult
 import com.LittleSmiles.com.core.domain.model.User
 import com.LittleSmiles.com.core.domain.repository.AuthRepository
-import com.LittleSmiles.com.core.domain.repository.BillingRepository
 import com.LittleSmiles.com.core.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Session + entitlement orchestrator.
- *
- * Mandatory login phase: all content unlocked for verified users during 2026 Early Access.
+ * Clean session orchestrator for 2026 Early Access.
+ * Handles user profile validation and session states.
  */
 @HiltViewModel
 class AppViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val billingRepository: BillingRepository,
     private val authRepository: AuthRepository
 ) : ViewModel(), DefaultLifecycleObserver {
 
@@ -43,21 +39,7 @@ class AppViewModel @Inject constructor(
 
     init {
         registerProcessLifecycleObserver()
-        viewModelScope.launch {
-            runCatching { billingRepository.startConnection() }
-                .onFailure { Timber.e(it, "Initial billing connection failed") }
-        }
         checkSession()
-        /*
-        viewModelScope.launch {
-            billingRepository.isPremium.collect { premiumFromPlay ->
-                if (premiumFromPlay) {
-                    _userProfile.update { it?.copy(isPremium = true) }
-                    _entitlement.value = Entitlement.fromUser(_userProfile.value)
-                }
-            }
-        }
-        */
     }
 
     fun checkSession() {
@@ -74,12 +56,10 @@ class AppViewModel @Inject constructor(
         }
     }
 
-    /** Mandatory Login Phase: Guest path is no longer supported. */
-
     private suspend fun validateUser(uid: String) {
         when (val result = userRepository.loadUserProfile(uid)) {
             is ProfileResult.Error -> {
-                android.util.Log.e("AppViewModel", "Profile load failed", result.cause)
+                Timber.e(result.cause, "Profile load failed: %s", result.message)
                 _uiState.value = NavigationState.Error(result.message)
             }
             is ProfileResult.Success -> {
@@ -89,10 +69,7 @@ class AppViewModel @Inject constructor(
                     return
                 }
                 _userProfile.value = profile
-                runCatching { billingRepository.refreshPurchases() }
-                val entitlement = Entitlement.fromUser(profile)
-                _entitlement.value = entitlement
-                // Soft freemium: always land on Menu when signed in with a profile.
+                _entitlement.value = Entitlement.fromUser(profile)
                 _uiState.value = NavigationState.Authenticated
             }
         }
@@ -101,14 +78,12 @@ class AppViewModel @Inject constructor(
     fun refreshEntitlement() {
         viewModelScope.launch {
             val uid = authRepository.currentUserId ?: return@launch
-            when (val result = userRepository.loadUserProfile(uid)) {
-                is ProfileResult.Success -> {
-                    result.user?.let {
-                        _userProfile.value = it
-                        _entitlement.value = Entitlement.fromUser(it)
-                    }
+            val result = userRepository.loadUserProfile(uid)
+            if (result is ProfileResult.Success) {
+                result.user?.let {
+                    _userProfile.value = it
+                    _entitlement.value = Entitlement.fromUser(it)
                 }
-                is ProfileResult.Error -> Unit
             }
         }
     }
@@ -121,11 +96,8 @@ class AppViewModel @Inject constructor(
     }
 
     override fun onStart(owner: LifecycleOwner) {
-        // Triggered every time the app enters the foreground
-        viewModelScope.launch {
-            runCatching { billingRepository.startConnection() }
-                .onFailure { Timber.e(it, "Foreground billing refresh failed") }
-        }
+        // App returned to foreground - check session validity
+        checkSession()
     }
 
     override fun onCleared() {
@@ -136,19 +108,18 @@ class AppViewModel @Inject constructor(
     private fun registerProcessLifecycleObserver() {
         runCatching {
             ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-        }.onFailure { Timber.d(it, "ProcessLifecycleOwner registration skipped") }
+        }.onFailure { Timber.d(it, "Lifecycle registration skipped") }
     }
 
     private fun removeProcessLifecycleObserver() {
         runCatching {
             ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
-        }.onFailure { Timber.d(it, "ProcessLifecycleOwner removal skipped") }
+        }.onFailure { Timber.d(it, "Lifecycle removal skipped") }
     }
 }
 
 sealed class NavigationState {
     data object Loading : NavigationState()
-    /** Signed-in user with profile (trial, free, or premium). */
     data object Authenticated : NavigationState()
     data object LoginRequired : NavigationState()
     data class Error(val message: String) : NavigationState()
