@@ -160,4 +160,17 @@ class UserRepositoryImpl @Inject constructor(
     }.onFailure { 
         Timber.e(it, "Premium sync failed")
     }
+
+    override suspend fun reportError(message: String, stackTrace: String) {
+        runCatching {
+            val errorData = hashMapOf(
+                "message" to message,
+                "stackTrace" to stackTrace,
+                "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
+                "platform" to "android",
+                "userId" to auth.currentUser?.uid
+            )
+            db.collection("system_errors").add(errorData).await()
+        }.onFailure { Timber.e(it, "Failed to write error report to Firestore") }
+    }
 }

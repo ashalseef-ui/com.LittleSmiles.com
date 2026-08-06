@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,6 +42,8 @@ class AuthViewModel @Inject constructor(
                 }
                 handleLogin(uid, normalizedEmail, deviceId)
             } catch (e: Exception) {
+                Timber.e(e, "Sign in failed for %s", email)
+                userRepository.reportError(e.message ?: "Sign in failed", e.stackTraceToString())
                 _uiState.value = AuthUiState.Error(e.message ?: "Sign in failed")
             }
         }
@@ -106,6 +109,8 @@ class AuthViewModel @Inject constructor(
                 
                 _uiState.value = AuthUiState.Unverified(normalizedEmail)
             } catch (e: Exception) {
+                Timber.e(e, "Sign up failed for %s", email)
+                userRepository.reportError(e.message ?: "Sign up failed", e.stackTraceToString())
                 _uiState.value = AuthUiState.Error(e.message ?: "Sign up failed")
             }
         }
@@ -120,6 +125,8 @@ class AuthViewModel @Inject constructor(
                 _uiState.value = AuthUiState.Info("Verification email sent! Please check your inbox.")
                 startResendTimer()
             } catch (e: Exception) {
+                Timber.e(e, "Failed to resend verification email")
+                userRepository.reportError(e.message ?: "Resend verification failed", e.stackTraceToString())
                 _uiState.value = AuthUiState.Error(e.message ?: "Failed to resend email")
             }
         }
@@ -147,6 +154,8 @@ class AuthViewModel @Inject constructor(
                     _uiState.value = AuthUiState.Error("Email still not verified. Please check your inbox.")
                 }
             } catch (e: Exception) {
+                Timber.e(e, "Refresh verification status failed")
+                userRepository.reportError(e.message ?: "Refresh verification failed", e.stackTraceToString())
                 _uiState.value = AuthUiState.Error(e.message ?: "Refresh failed")
             }
         }
@@ -164,6 +173,8 @@ class AuthViewModel @Inject constructor(
                 authRepository.resetPassword(normalizedEmail)
                 _uiState.value = AuthUiState.Info("Reset link sent! Please check your inbox.")
             } catch (e: Exception) {
+                Timber.e(e, "Failed to send reset email to %s", normalizedEmail)
+                userRepository.reportError(e.message ?: "Reset password failed", e.stackTraceToString())
                 _uiState.value = AuthUiState.Error(e.message ?: "Failed to send reset email")
             }
         }
@@ -184,6 +195,8 @@ class AuthViewModel @Inject constructor(
                 
                 handleLogin(uid, normalizedEmail, deviceId)
             } catch (e: Exception) {
+                Timber.e(e, "Google sign in failed")
+                userRepository.reportError(e.message ?: "Google sign in failed", e.stackTraceToString())
                 _uiState.value = AuthUiState.Error(e.message ?: "Google sign in failed")
             }
         }

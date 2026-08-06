@@ -20,4 +20,5 @@ interface UserRepository {
         productId: String,
         isSubscription: Boolean
     ): Result<Unit>
+    suspend fun reportError(message: String, stackTrace: String)
 }

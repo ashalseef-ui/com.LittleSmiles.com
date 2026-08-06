@@ -86,6 +86,7 @@ fun LoginScreen(
             val errorMsg = when(e.statusCode) {
                 10 -> "Developer Error (10): Check SHA-1 in Firebase Console."
                 7 -> "Network Error: Please check your connection."
+                12501 -> "Sign-in Cancelled (12501). Check SHA-1/Web Client ID if unexpected."
                 else -> "Google Sign-in failed (${e.statusCode})"
             }
             viewModel.setExternalError(errorMsg)
@@ -109,7 +110,8 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 6.dp),
+                .padding(horizontal = 20.dp, vertical = 6.dp)
+                .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header Row - Compact
@@ -128,7 +130,7 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(25.dp))
             
             // Integrated Branding
             val brandName = "Little Buds Academy"
@@ -148,21 +150,21 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                "✨ EARLY ACCESS 2026: ALL GAMES FREE ✨",
+                "✨ EARLY ACCESS 2026: ALL FREE. ✨",
                 color = Color.White.copy(alpha = 0.9f),
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 letterSpacing = 1.sp
             )
             
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // --- Floating Auth Content ---
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = 480.dp)
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 9.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -170,7 +172,7 @@ fun LoginScreen(
                     color = Color.White,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Black,
-                    modifier = Modifier.padding(bottom = 22.dp)
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
 
                 CrystalTextField(
@@ -183,7 +185,7 @@ fun LoginScreen(
                     enabled = !isLoading
                 )
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 CrystalTextField(
                     value = password,
@@ -201,7 +203,7 @@ fun LoginScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 11.dp),
+                        .padding(vertical = 9.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -232,7 +234,7 @@ fun LoginScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(15.dp))
 
                 LiquidButton(
                     text = "Let's Play!",
@@ -241,7 +243,7 @@ fun LoginScreen(
                     isLoading = isLoading
                 )
 
-                Spacer(modifier = Modifier.height(13.dp))
+                Spacer(modifier = Modifier.height(7.dp))
 
                 TextButton(
                     onClick = { viewModel.signUp(email.trim(), password.trim(), deviceId) }, 
@@ -250,9 +252,9 @@ fun LoginScreen(
                     Text("New Here? Create Account", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
                 }
 
-                Spacer(modifier = Modifier.height(22.dp))
+                Spacer(modifier = Modifier.height(7.dp))
                 Text("✨ OR ✨", color = Color.White.copy(alpha = 0.3f), fontWeight = FontWeight.Black, fontSize = 13.sp)
-                Spacer(modifier = Modifier.height(22.dp))
+                Spacer(modifier = Modifier.height(7.dp))
 
                 CrystalGoogleButton(
                     onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
@@ -275,7 +277,7 @@ fun LoginScreen(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(top = 11.dp)
+                            modifier = Modifier.padding(top = 9.dp)
                         )
                         
                         if (uiState is AuthUiState.Unverified) {
@@ -302,7 +304,7 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(34.dp))
+            Spacer(modifier = Modifier.height(64.dp))
             
             Text(
                 "Verified Parent Portal",

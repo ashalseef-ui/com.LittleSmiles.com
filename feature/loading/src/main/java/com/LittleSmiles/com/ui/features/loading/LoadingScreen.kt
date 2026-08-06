@@ -36,9 +36,7 @@ fun LoadingScreen() {
         ) {
             // Pure Floating Logo
             Box(
-                modifier = Modifier
-                    .size(180.dp)
-                    .graphicsLayer { shadowElevation = 16f },
+                modifier = Modifier.size(180.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -62,10 +60,7 @@ fun LoadingScreen() {
                             fontSize = 48.sp,
                             fontWeight = FontWeight.Black,
                             color = Color.White,
-                            letterSpacing = 2.sp,
-                            modifier = Modifier.graphicsLayer { 
-                                shadowElevation = 12f
-                            }
+                            letterSpacing = 2.sp
                         )
                         if (word != lineWords.last()) Spacer(Modifier.width(12.dp))
                     }
@@ -133,8 +128,7 @@ fun CrystalLoadingDots() {
                         this.alpha = alpha
                     },
                 color = color,
-                shape = CircleShape,
-                shadowElevation = 8.dp
+                shape = CircleShape
             ) {}
         }
     }
